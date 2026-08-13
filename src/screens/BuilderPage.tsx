@@ -148,8 +148,7 @@ function BuilderContent({ navigate, initialTheme }: BuilderPageProps) {
 
   const handleShare = async () => {
     const url = getPublicUrl();
-    if (!url) return;
-
+    if (!url || !data.personal) return;
     const shareData = {
       title: `${data.personal.firstName} ${data.personal.lastName} - Portfolio`,
       text: `Check out ${data.personal.firstName}'s portfolio: ${data.personal.role}`,
@@ -171,7 +170,7 @@ function BuilderContent({ navigate, initialTheme }: BuilderPageProps) {
 
   const handleShareLinkedIn = () => {
     const url = getPublicUrl();
-    if (!url) return;
+    if (!url || !data.personal) return;
     const text = encodeURIComponent(`Check out ${data.personal.firstName} ${data.personal.lastName}'s portfolio - ${data.personal.role}`);
     window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&summary=${text}`, '_blank', 'noopener,noreferrer');
   };

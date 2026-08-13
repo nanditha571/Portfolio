@@ -23,6 +23,19 @@ export default function DashboardPage({ navigate }: DashboardPageProps) {
     setError('');
   };
 
+  const getAuthErrorMessage = (err: unknown): string => {
+    if (err instanceof Error) {
+      if (err.message === 'Username already taken') {
+        return 'An account with this username already exists. Please log in.';
+      }
+      if (err.message === 'Invalid username or password') {
+        return 'Invalid username or password. Please try again.';
+      }
+      return err.message;
+    }
+    return 'Something went wrong';
+  };
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -31,7 +44,7 @@ export default function DashboardPage({ navigate }: DashboardPageProps) {
       await signup(username.trim(), password);
       navigate('/builder');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Signup failed');
+      setError(getAuthErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -45,7 +58,7 @@ export default function DashboardPage({ navigate }: DashboardPageProps) {
       await login(username.trim(), password);
       navigate('/builder');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      setError(getAuthErrorMessage(err));
     } finally {
       setLoading(false);
     }

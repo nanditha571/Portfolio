@@ -1,3 +1,5 @@
+import { samplePortfolio } from '@/data/samplePortfolio';
+
 const API_BASE = (() => {
   if (typeof window === 'undefined') {
     return import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
@@ -16,6 +18,30 @@ const API_BASE = (() => {
 
   return import.meta.env.VITE_API_BASE_URL;
 })();
+
+function normalizePortfolio(portfolio: unknown): any {
+  if (!portfolio || typeof portfolio !== 'object') {
+    return samplePortfolio;
+  }
+
+  const p = portfolio as Record<string, unknown>;
+
+  const source = p.data && typeof p.data === 'object' ? (p.data as Record<string, unknown>) : p;
+
+  return {
+    ...samplePortfolio,
+    ...source,
+    personal: source.personal && typeof source.personal === 'object' ? (source.personal as Record<string, unknown>) : samplePortfolio.personal,
+    about: source.about && typeof source.about === 'object' ? (source.about as Record<string, unknown>) : samplePortfolio.about,
+    skills: Array.isArray(source.skills) ? (source.skills as unknown[]) : samplePortfolio.skills,
+    projects: Array.isArray(source.projects) ? (source.projects as unknown[]) : samplePortfolio.projects,
+    experience: Array.isArray(source.experience) ? (source.experience as unknown[]) : samplePortfolio.experience,
+    education: Array.isArray(source.education) ? (source.education as unknown[]) : samplePortfolio.education,
+    certifications: Array.isArray(source.certifications) ? (source.certifications as unknown[]) : samplePortfolio.certifications,
+    socials: source.socials && typeof source.socials === 'object' ? { ...samplePortfolio.socials, ...(source.socials as Record<string, unknown>) } : samplePortfolio.socials,
+    resume: source.resume && typeof source.resume === 'object' ? { ...samplePortfolio.resume, ...(source.resume as Record<string, unknown>) } : samplePortfolio.resume,
+  };
+}
 
 export async function publishPortfolio(portfolioData: unknown) {
   const res = await fetch(`${API_BASE}/portfolios/publish`, {
@@ -72,7 +98,7 @@ export async function fetchPublishedPortfolio(username: string) {
   if (!res.ok) {
     throw new Error(data.error || 'Portfolio not found');
   }
-  return data.portfolio;
+  return normalizePortfolio(data.portfolio);
 }
 
 export async function checkUsernameAvailability(username: string) {
