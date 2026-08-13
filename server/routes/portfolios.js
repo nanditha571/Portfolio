@@ -1,21 +1,25 @@
 import express from 'express';
-import { loadPortfolios, savePortfolios, loadUsers, sessions } from '../storage.js';
+import {
+  findUserById,
+  findPortfolioByUsername,
+  upsertPortfolio,
+  setPortfolioPublished,
+  sessions,
+} from '../storage.js';
 
 const router = express.Router();
 
-function getSessionUser(req) {
+async function getSessionUser(req) {
   const token = req.cookies.session;
   if (!token) return null;
   const session = sessions.get(token);
   if (!session) return null;
-  const users = loadUsers();
-  return users.find((u) => u.id === session.userId) || null;
+  return findUserById(session.userId);
 }
 
-router.get('/:username', (req, res) => {
+router.get('/:username', async (req, res) => {
   const { username } = req.params;
-  const portfolios = loadPortfolios();
-  const portfolio = portfolios[username.toLowerCase()];
+  const portfolio = await findPortfolioByUsername(username);
 
   if (!portfolio || portfolio.published === false) {
     return res.status(404).json({ error: 'Portfolio not found' });
@@ -24,8 +28,8 @@ router.get('/:username', (req, res) => {
   res.json({ portfolio });
 });
 
-router.put('/:username', (req, res) => {
-  const user = getSessionUser(req);
+router.put('/:username', async (req, res) => {
+  const user = await getSessionUser(req);
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -40,19 +44,18 @@ router.put('/:username', (req, res) => {
     return res.status(400).json({ error: 'Invalid portfolio data' });
   }
 
-  const portfolios = loadPortfolios();
-  portfolios[username.toLowerCase()] = {
+  const saved = await upsertPortfolio({
     ...portfolioData,
-    username: username.toLowerCase(),
-    publishedAt: new Date().toISOString(),
-  };
-  savePortfolios(portfolios);
+    username,
+    userId: user.id,
+    published: true,
+  });
 
   res.json({ success: true, url: `/p/${username.toLowerCase()}` });
 });
 
-router.post('/publish', (req, res) => {
-  const user = getSessionUser(req);
+router.post('/publish', async (req, res) => {
+  const user = await getSessionUser(req);
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -62,40 +65,31 @@ router.post('/publish', (req, res) => {
     return res.status(400).json({ error: 'Invalid portfolio data' });
   }
 
-  const portfolios = loadPortfolios();
   const slug = user.username.toLowerCase();
-
-  portfolios[slug] = {
+  const saved = await upsertPortfolio({
     ...portfolioData,
     username: slug,
-    publishedAt: new Date().toISOString(),
+    userId: user.id,
     published: true,
-  };
-  savePortfolios(portfolios);
+  });
 
   res.json({ success: true, url: `/p/${slug}` });
 });
 
-router.post('/unpublish', (req, res) => {
-  const user = getSessionUser(req);
+router.post('/unpublish', async (req, res) => {
+  const user = await getSessionUser(req);
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const portfolios = loadPortfolios();
   const slug = user.username.toLowerCase();
-  const existing = portfolios[slug];
+  const existing = await findPortfolioByUsername(slug);
 
   if (!existing) {
     return res.status(404).json({ error: 'Portfolio not found' });
   }
 
-  portfolios[slug] = {
-    ...existing,
-    published: false,
-    unpublishedAt: new Date().toISOString(),
-  };
-  savePortfolios(portfolios);
+  const saved = await setPortfolioPublished(slug, false);
 
   res.json({ success: true, url: `/p/${slug}` });
 });

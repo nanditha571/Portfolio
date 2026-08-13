@@ -1,16 +1,20 @@
 const API_BASE = (() => {
   if (typeof window === 'undefined') {
-    return 'http://localhost:3001/api';
+    return import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
   }
 
   const hostname = window.location.hostname;
-  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0.0.0.0';
+
+  const isLocalhost =
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname === '0.0.0.0';
 
   if (isLocalhost) {
     return 'http://localhost:3001/api';
   }
 
-  return '/api';
+  return import.meta.env.VITE_API_BASE_URL;
 })();
 
 export async function publishPortfolio(portfolioData: unknown) {
