@@ -1,13 +1,12 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import path from 'path';
 import authRoutes from './routes/auth.js';
 import portfolioRoutes from './routes/portfolios.js';
-import { loadUsers, saveUsers, loadPortfolios, savePortfolios, sessions } from './storage.js';
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
 const corsOptions = {
@@ -37,33 +36,15 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
+if (process.env.VERCEL === '1' || process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 app.use('/api/auth', authRoutes);
 app.use('/api/portfolios', portfolioRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
-});
-
-const distPath = path.join(process.cwd(), 'dist');
-app.use(express.static(distPath));
-
-app.get('/p/:slug', (req, res) => {
-  const slug = req.params.slug.toLowerCase();
-  const portfolios = loadPortfolios();
-  const portfolio = portfolios[slug];
-
-  if (!portfolio || portfolio.published === false) {
-    return res.status(404).send('Portfolio not found');
-  }
-
-  res.sendFile(path.join(distPath, 'index.html'));
-});
-
-app.get('*', (req, res) => {
-  if (req.path.startsWith('/api/')) {
-    return res.status(404).json({ error: 'Not found' });
-  }
-  res.sendFile(path.join(distPath, 'index.html'));
 });
 
 export default app;
