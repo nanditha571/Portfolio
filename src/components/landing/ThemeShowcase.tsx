@@ -1,5 +1,5 @@
-import { useRef } from 'react';
 import { themeRegistry } from '@/data/themeRegistry';
+import { ThemeThumbnail } from '@/components/landing/ThemeThumbnail';
 
 interface ThemeInfo {
   id: string;
@@ -45,19 +45,11 @@ export const ThemeShowcase = ({ navigate }: ThemeShowcaseProps) => {
 };
 
 const ThemeCard = ({ theme, navigate }: { theme: ThemeInfo; navigate: (to: string) => void }) => {
-  const cardRef = useRef<HTMLDivElement>(null);
-
   return (
-    <div
-      ref={cardRef}
-      className="group relative bg-white rounded-xl border border-slate-200 overflow-hidden transition-all duration-300 hover:border-indigo-200 hover:shadow-lg hover:-translate-y-1"
-    >
-      <div className="aspect-[4/3] relative overflow-hidden bg-slate-50">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-violet-50 to-white" />
-        <div className="absolute inset-0 opacity-70" style={{
-          backgroundImage: `linear-gradient(135deg, ${theme.colors[0]}22 0%, transparent 50%), radial-gradient(circle at 30% 30%, ${theme.colors[0]}15 0%, transparent 50%)`
-        }} />
-        <div className="absolute top-3 left-3">
+    <div className="group relative bg-white rounded-xl border border-slate-200 overflow-hidden transition-all duration-300 hover:border-indigo-200 hover:shadow-lg hover:-translate-y-1">
+      <div className="relative">
+        <ThemeThumbnail themeId={theme.id} />
+        <div className="absolute top-3 left-3 z-20">
           <span className="inline-block px-2 py-1 rounded-md bg-white/80 border border-slate-200 text-[10px] font-semibold text-slate-700">
             {theme.category}
           </span>
