@@ -75,7 +75,7 @@ router.post('/signup', async (req, res) => {
 
     res.cookie('session', token, {
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       secure: process.env.NODE_ENV === 'production',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -114,7 +114,7 @@ router.post('/login', async (req, res) => {
 
     res.cookie('session', token, {
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       secure: process.env.NODE_ENV === 'production',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -133,7 +133,10 @@ router.post('/logout', (req, res) => {
   if (token) {
     sessions.delete(token);
   }
-  res.clearCookie('session');
+  res.clearCookie('session', {
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    secure: process.env.NODE_ENV === 'production',
+  });
   res.json({ success: true });
 });
 
