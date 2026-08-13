@@ -1,5 +1,5 @@
 import { themeRegistry } from '@/data/themeRegistry';
-import { ThemeThumbnail } from '@/components/landing/ThemeThumbnail';
+import { ThemeMiniPreview } from '@/components/landing/ThemeMiniPreview';
 
 interface ThemeInfo {
   id: string;
@@ -48,7 +48,7 @@ const ThemeCard = ({ theme, navigate }: { theme: ThemeInfo; navigate: (to: strin
   return (
     <div className="group relative bg-white rounded-xl border border-slate-200 overflow-hidden transition-all duration-300 hover:border-indigo-200 hover:shadow-lg hover:-translate-y-1">
       <div className="relative">
-        <ThemeThumbnail themeId={theme.id} />
+        <ThemeMiniPreview themeId={theme.id} />
         <div className="absolute top-3 left-3 z-20">
           <span className="inline-block px-2 py-1 rounded-md bg-white/80 border border-slate-200 text-[10px] font-semibold text-slate-700">
             {theme.category}
