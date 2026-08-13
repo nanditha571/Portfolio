@@ -19,7 +19,7 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 const API_BASE = (() => {
   if (typeof window === 'undefined') {
-    return 'http://localhost:3001/api';
+    return import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
   }
 
   const hostname = window.location.hostname;
@@ -29,7 +29,7 @@ const API_BASE = (() => {
     return 'http://localhost:3001/api';
   }
 
-  return '/api';
+  return import.meta.env.VITE_API_BASE_URL;
 })();
 
 async function apiRequest(path: string, options: RequestInit = {}) {
