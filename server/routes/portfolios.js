@@ -25,7 +25,7 @@ router.get('/:username', async (req, res) => {
     return res.status(404).json({ error: 'Portfolio not found' });
   }
 
-  res.json({ portfolio });
+  res.json({ portfolio: portfolio.data || portfolio });
 });
 
 router.put('/:username', async (req, res) => {

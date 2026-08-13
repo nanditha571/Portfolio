@@ -112,7 +112,8 @@ export function loadPortfolio(): Portfolio | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as Portfolio;
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    return normalizePortfolio(parsed) as Portfolio;
   } catch {
     return null;
   }
@@ -132,4 +133,28 @@ export function clearPortfolio(): void {
   } catch {
     // ignore
   }
+}
+
+export function normalizePortfolio(portfolio: unknown): Portfolio {
+  if (!portfolio || typeof portfolio !== 'object') {
+    return samplePortfolio;
+  }
+
+  const p = portfolio as Record<string, unknown>;
+
+  const source = p.data && typeof p.data === 'object' ? (p.data as Record<string, unknown>) : p;
+
+  return {
+    ...samplePortfolio,
+    ...source,
+    personal: source.personal && typeof source.personal === 'object' ? (source.personal as Record<string, unknown>) : samplePortfolio.personal,
+    about: source.about && typeof source.about === 'object' ? (source.about as Record<string, unknown>) : samplePortfolio.about,
+    skills: Array.isArray(source.skills) ? (source.skills as unknown[]) : samplePortfolio.skills,
+    projects: Array.isArray(source.projects) ? (source.projects as unknown[]) : samplePortfolio.projects,
+    experience: Array.isArray(source.experience) ? (source.experience as unknown[]) : samplePortfolio.experience,
+    education: Array.isArray(source.education) ? (source.education as unknown[]) : samplePortfolio.education,
+    certifications: Array.isArray(source.certifications) ? (source.certifications as unknown[]) : samplePortfolio.certifications,
+    socials: source.socials && typeof source.socials === 'object' ? { ...samplePortfolio.socials, ...(source.socials as Record<string, unknown>) } : samplePortfolio.socials,
+    resume: source.resume && typeof source.resume === 'object' ? { ...samplePortfolio.resume, ...(source.resume as Record<string, unknown>) } : samplePortfolio.resume,
+  } as Portfolio;
 }

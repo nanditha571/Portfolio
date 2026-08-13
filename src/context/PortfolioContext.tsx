@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { Portfolio } from '@/types/portfolio';
-import { loadPortfolio, savePortfolio, samplePortfolio } from '@/data/samplePortfolio';
+import { loadPortfolio, savePortfolio, samplePortfolio, normalizePortfolio } from '@/data/samplePortfolio';
 
 export interface PortfolioContextType {
   data: Portfolio;
@@ -11,7 +11,7 @@ export interface PortfolioContextType {
 export const PortfolioContext = createContext<PortfolioContextType | null>(null);
 
 export function PortfolioProvider({ children }: { children: React.ReactNode }) {
-  const [data, setData] = useState<Portfolio>(() => loadPortfolio() || samplePortfolio);
+  const [data, setData] = useState<Portfolio>(() => normalizePortfolio(loadPortfolio() || samplePortfolio));
 
   useEffect(() => {
     savePortfolio(data);
